@@ -7,6 +7,8 @@ import {Switch, Route, Redirect} from "react-router-dom";
 import SignInPage from './pages/SignInPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import RestorePasswordPage from './pages/RestorePasswordPage';
+import SignUpPage from './pages/SignUpPage';
 
 function App() {
   return (
@@ -15,12 +17,8 @@ function App() {
         <Redirect to='/login' />
       </Route>
       <Route path="/login" component={SignInPage}/>
-      <Route path="/signUp">
-        
-      </Route>
-      <Route path="/forgotpassword">
-        
-      </Route>
+      <Route path="/signUp" component={SignUpPage}/>
+      <Route path="/forgotpassword" component={RestorePasswordPage}/>
       <Route path="/legal/terms" component={TermsPage}/>
       <Route path="/legal/privacy" component={PrivacyPage}/>
     </Switch>

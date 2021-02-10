@@ -1,17 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
 import {Form as FinalForm, Field} from 'react-final-form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faUser} from '@fortawesome/free-solid-svg-icons';
+import {Link} from 'react-router-dom';
 
-interface SignInFormValues {
+interface RestorePasswordFormValues {
   email: string;
   password: string;
 }
 
-function SignInForm() {
-  function onSubmit(values: SignInFormValues) {
+function RestorePasswordForm() {
+  function onSubmit(values: RestorePasswordFormValues) {
     
   }
 
@@ -20,8 +20,8 @@ function SignInForm() {
       onSubmit={onSubmit}
       render={({handleSubmit}) => (
       <Form onSubmit={handleSubmit}>
-        <MainHeader>Welcome to BaseballCloud!</MainHeader>
-        <SecondaryHeader>Sign into your account here:</SecondaryHeader>
+        <MainHeader>Forgot Password</MainHeader>
+        <SecondaryHeader>Please enter your email address. You will receive a link to reset your password via email.</SecondaryHeader>
         <Field name='email' render={({input}) => (
             <InputField>
               <Icon aria-hidden='true'>
@@ -31,26 +31,16 @@ function SignInForm() {
               <Input {...input} type="email" placeholder="Email" />
             </InputField>
         )} />
-        <Field name='password' render={({input}) => (
-            <InputField>
-              <Icon aria-hidden='true'>
-                <FontAwesomeIcon icon={faLock}/>
-              </Icon>
-              <Label>Password</Label>
-              <Input {...input} type="password" placeholder="Password" />
-            </InputField>
-        )} />
-        <Button type='submit'>Sign In</Button>
-        <ForgottenLink to={'forgotpassword'}>Forgotten password?</ForgottenLink>
-        <SignLinkText>Don’t have an account?
-          <SignLink to={'signUp'}>Sign Up</SignLink>
+        <Button type='submit'>Submit</Button>
+        <SignLinkText>Remember password
+          <SignLink to={'/login'}>Sign in</SignLink>
         </SignLinkText>
       </Form>
     )} />
   );
 }
 
-export default SignInForm;
+export default RestorePasswordForm;
 
 const Form = styled.form`
   padding: 16px;
@@ -125,16 +115,6 @@ const Button = styled.button`
   }
   &:active {
     box-shadow: inset 0 1px 3px 0 rgb(0 0 0 / 25%);
-  }
-`
-
-const ForgottenLink = styled(Link)`
-  margin-bottom: 15px;
-  color: #337ab7;
-  align-self: flex-end;
-  &:hover {
-    color: #23527c;
-    text-decoration: underline;
   }
 `
 
