@@ -1,25 +1,29 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './assets/css/fonts.css';
+import './assets/css/normalize.css';
+import './assets/css/reset.css';
+import './assets/css/common.css';
+import {Switch, Route, Redirect} from "react-router-dom";
+import SignInPage from './pages/SignInPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Switch>
+      <Route exact path='/'>
+        <Redirect to='/login' />
+      </Route>
+      <Route path="/login" component={SignInPage}/>
+      <Route path="/signUp">
+        
+      </Route>
+      <Route path="/forgotpassword">
+        
+      </Route>
+      <Route path="/legal/terms" component={TermsPage}/>
+      <Route path="/legal/privacy" component={PrivacyPage}/>
+    </Switch>
   );
 }
 
