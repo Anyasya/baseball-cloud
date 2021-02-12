@@ -5,17 +5,22 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser, faLock, faCheck} from '@fortawesome/free-solid-svg-icons';
 import {Link} from 'react-router-dom';
 import ConfirmIcon from '../ConfirmIcon';
+import { useDispatch } from 'react-redux';
+import { actions } from 'store';
 
 interface SignUpFormValues {
   email: string;
   password: string;
+  password_confirmation: string;
 }
 
 function SignUpForm() {
+  const dispatch = useDispatch();
   const [userCategory, setUserCategory] = useState('player');
 
   function onSubmit(values: SignUpFormValues) {
-    
+    const {email, password, password_confirmation} = values;
+    dispatch(actions.auth.signUp({email, password, password_confirmation, role: userCategory}));
   }
 
   return (
@@ -59,8 +64,8 @@ function SignUpForm() {
               <Icon aria-hidden='true'>
                 <FontAwesomeIcon icon={faUser}/>
               </Icon>
-              <Label>Email</Label>
-              <Input {...input} type="email" placeholder="Email" />
+              <Label htmlFor='email'>Email</Label>
+              <Input {...input} type="email" placeholder="Email" id='email'/>
             </InputField>
         )} />
         <Field name='password' render={({input}) => (
@@ -68,17 +73,17 @@ function SignUpForm() {
               <Icon aria-hidden='true'>
                 <FontAwesomeIcon icon={faLock}/>
               </Icon>
-              <Label>Password</Label>
-              <Input {...input} type="password" placeholder="Password" />
+              <Label htmlFor='password'>Password</Label>
+              <Input {...input} type="password" placeholder="Password" id='password'/>
             </InputField>
         )} />
-        <Field name='confirmPassword' render={({input}) => (
+        <Field name='password_confirmation' render={({input}) => (
             <LastInputField>
               <Icon aria-hidden='true'>
                 <FontAwesomeIcon icon={faCheck}/>
               </Icon>
-              <Label>Password</Label>
-              <Input {...input} type="password" placeholder="Confirm Password" />
+              <Label htmlFor='confirmPassword'>Confirm password</Label>
+              <Input {...input} type="password" placeholder="Confirm Password" id='confirmPassword'/>
             </LastInputField>
         )} />
         <Button type='submit'>Sign Up</Button>

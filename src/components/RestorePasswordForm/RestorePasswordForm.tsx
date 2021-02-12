@@ -27,8 +27,8 @@ function RestorePasswordForm() {
               <Icon aria-hidden='true'>
                 <FontAwesomeIcon icon={faUser}/>
               </Icon>
-              <Label>Email</Label>
-              <Input {...input} type="email" placeholder="Email" />
+              <Label htmlFor='email'>Email</Label>
+              <Input {...input} type="email" placeholder="Email" id='email'/>
             </InputField>
         )} />
         <Button type='submit'>Submit</Button>

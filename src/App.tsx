@@ -9,18 +9,21 @@ import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import RestorePasswordPage from './pages/RestorePasswordPage';
 import SignUpPage from './pages/SignUpPage';
+import MainPage from 'pages/MainPage';
+import {AppRoutes} from './routes';
 
 function App() {
   return (
     <Switch>
       <Route exact path='/'>
-        <Redirect to='/login' />
+        <Redirect to={AppRoutes.signIn} />
       </Route>
-      <Route path="/login" component={SignInPage}/>
-      <Route path="/signUp" component={SignUpPage}/>
-      <Route path="/forgotpassword" component={RestorePasswordPage}/>
-      <Route path="/legal/terms" component={TermsPage}/>
-      <Route path="/legal/privacy" component={PrivacyPage}/>
+      <Route path={AppRoutes.signIn} component={SignInPage}/>
+      <Route path={AppRoutes.signUp} component={SignUpPage}/>
+      <Route path={AppRoutes.restorePassword} component={RestorePasswordPage}/>
+      <Route path={AppRoutes.terms} component={TermsPage}/>
+      <Route path={AppRoutes.privacy} component={PrivacyPage}/>
+      <Route path={AppRoutes.profile} component={MainPage}/>
     </Switch>
   );
 }

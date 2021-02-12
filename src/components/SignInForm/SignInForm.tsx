@@ -4,6 +4,8 @@ import {Form as FinalForm, Field} from 'react-final-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { actions } from 'store';
 
 interface SignInFormValues {
   email: string;
@@ -11,8 +13,10 @@ interface SignInFormValues {
 }
 
 function SignInForm() {
+  const dispatch = useDispatch();
+
   function onSubmit(values: SignInFormValues) {
-    
+    dispatch(actions.auth.signIn(values));
   }
 
   return (
@@ -27,8 +31,8 @@ function SignInForm() {
               <Icon aria-hidden='true'>
                 <FontAwesomeIcon icon={faUser}/>
               </Icon>
-              <Label>Email</Label>
-              <Input {...input} type="email" placeholder="Email" />
+              <Label htmlFor='email'>Email</Label>
+              <Input {...input} type='email' placeholder='Email' id='email'/>
             </InputField>
         )} />
         <Field name='password' render={({input}) => (
@@ -36,8 +40,8 @@ function SignInForm() {
               <Icon aria-hidden='true'>
                 <FontAwesomeIcon icon={faLock}/>
               </Icon>
-              <Label>Password</Label>
-              <Input {...input} type="password" placeholder="Password" />
+              <Label htmlFor='password'>Password</Label>
+              <Input {...input} type='password' placeholder='Password' id='password'/>
             </InputField>
         )} />
         <Button type='submit'>Sign In</Button>
