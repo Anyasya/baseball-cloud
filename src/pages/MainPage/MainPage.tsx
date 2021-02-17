@@ -35,6 +35,7 @@ const Main = styled.main`
   width: 100%;
   display: flex;
   flex-grow: 1;
+  overflow-y: scroll;
   background-color: #788b99;
 `
 
@@ -46,5 +47,4 @@ const UserBlock = styled.div`
 
 const AccountBlock = styled.div`
   flex-grow: 1;
-  
 `

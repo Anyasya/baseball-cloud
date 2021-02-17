@@ -6,6 +6,8 @@ import {AppRoutes} from 'routes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import ArrowDown from 'components/ArrowDown';
+import { useDispatch } from 'react-redux';
+import { actions } from 'store';
 
 interface HeaderProps {
   type: string;
@@ -13,6 +15,7 @@ interface HeaderProps {
 
 function Header({type}: HeaderProps) {
   const [hasProfileBtnClicked, setHasProfileBtnClicked] = useState(false);
+  const dispatch = useDispatch();
 
   return (
     <Root>
@@ -45,9 +48,9 @@ function Header({type}: HeaderProps) {
               <Link to={AppRoutes.profile}>
                 <ProfileLinkText>My Profile</ProfileLinkText>
               </Link>
-              <Link to={AppRoutes.signIn}>
-                <ProfileLinkText>Log Out</ProfileLinkText>
-              </Link>
+              <LogOutBtn type='button' onClick={() => dispatch(actions.auth.signOut())}>
+                Log Out
+              </LogOutBtn>
             </ProfileLinksWrapper>
           }
         </Navigation>
@@ -110,6 +113,16 @@ const Button = styled.button`
   border-radius: 4px;
   &:hover {
     background-color: #eee;
+  }
+`
+
+const LogOutBtn = styled.button`
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  color: #788b99;
+  &:hover {
+    background-color: rgba(72, 187, 255, 0.1);
   }
 `
 

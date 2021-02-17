@@ -1,9 +1,11 @@
+import { AppRoutes } from './../../routes';
 import {createAsyncThunk, createReducer, createAction} from '@reduxjs/toolkit';
 import {RootState} from 'store';
 import * as api from 'api/api';
+import History from '../../services/history';
 // import {handleAsyncError} from 'store/utils';
 
-const setAccessToken = createAction<string>('auth/setAccessToken');
+const setAccessData = createAction<{accessToken: string, client: string, uid: string}>('auth/setAccessData');
 
 const signIn = createAsyncThunk(
   'auth/signIn',
@@ -14,10 +16,7 @@ const signIn = createAsyncThunk(
       const accessToken = response.headers['access-token'];
       const client = response.headers.client;
       const uid = response.headers.uid;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('client', client);
-      localStorage.setItem('uid', uid);
-
+      localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -35,10 +34,7 @@ const signUp = createAsyncThunk(
       const accessToken = response.headers['access-token'];
       const client = response.headers.client;
       const uid = response.headers.uid;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('client', client);
-      localStorage.setItem('uid', uid);
-
+      localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -47,7 +43,8 @@ const signUp = createAsyncThunk(
 );
 
 const signOut = createAsyncThunk('auth/signOut', () => {
-  return localStorage.removeItem('accessToken');
+  localStorage.removeItem('accessData');
+  History.push(AppRoutes.signIn);
 });
 
 export const reducer = createReducer(
@@ -65,8 +62,11 @@ export const reducer = createReducer(
     hasSignPassed: false,
   },
   (builder) => {
-    builder.addCase(setAccessToken, (state, action) => {
-      state.accessToken = action.payload;
+    builder.addCase(setAccessData, (state, action) => {
+      const {accessToken, client, uid} = action.payload;
+      state.accessToken = accessToken;
+      state.client = client;
+      state.uid = uid;
     });
 
     builder
@@ -119,7 +119,7 @@ export const actions = {
   signUp,
   signIn,
   signOut,
-  setAccessToken,
+  setAccessData,
 };
 
 export const selectors = {

@@ -3,7 +3,7 @@ import axios, {
     AxiosError,
     AxiosRequestConfig,
   } from 'axios';
-  import {store, actions, selectors} from 'store';  
+  import {store, actions} from 'store';  
   export type CancelToken = AxiosCancelToken;
   export type RequestError<
     T = {message: string; statusCode: number; error: string}
@@ -19,8 +19,7 @@ import axios, {
     if (!config.withToken) {
       return config;
     }
-    const state = store?.getState();
-    const accessToken = state ? selectors.auth.selectAccessToken(state) : null;
+    const {accessToken, client, uid} = store?.getState().auth;
   
     if (!accessToken) {
       return config;
@@ -28,7 +27,9 @@ import axios, {
   
     const headers = {
       ...config.headers,
-      Authorization: `Bearer ${accessToken}`,
+      client,
+      uid,
+      "access-token": accessToken,
     };
   
     return {...config, headers};

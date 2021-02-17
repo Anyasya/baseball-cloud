@@ -1,4 +1,5 @@
 import httpClient from './httpClient';
+import * as queries from './queries';
 
 export async function signIn(email: string, password: string) {
   const user = {
@@ -18,4 +19,16 @@ export async function signUp(email: string, password: string, password_confirmat
   };
 
   return httpClient.post('/auth', user, {withToken: false});
+}
+
+export async function getSchools() {
+  return httpClient.post('/graphql', queries.getSchoolsQuery());
+}
+
+export function getTeams() {
+  return httpClient.post('/graphql', queries.getTeamsQuery());
+}
+
+export function getFacilities() {
+  return httpClient.post('/graphql', queries.getFacilitiesQuery());
 }
