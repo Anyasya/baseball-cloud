@@ -1,15 +1,15 @@
 import React from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import SignUpForm from '../../components/SignUpForm';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
+import bgImage from 'assets/img/authBg.png';
+import SignUpForm from '../../../components/SignUpForm';
 import styled from 'styled-components';
-import './style.css';
 
 function SignUpPage() {
   return (
     <Container>
-      <Header type='sign'/>
-      <Main className='main'>
+      <Header/>
+      <Main>
         <SignUpForm />
       </Main>
       <Footer />
@@ -32,4 +32,7 @@ const Main = styled.main`
   justify-content: center;
   align-items: center;
   flex-grow: 1;
+  background-image: url(${bgImage});
+  background-position: top center;
+  background-size: cover;
 `

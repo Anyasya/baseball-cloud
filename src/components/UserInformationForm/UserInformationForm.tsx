@@ -5,6 +5,8 @@ import userImage from '../../assets/img/userIconBig.png';
 import Select from 'react-select';
 import {customSelectStyles} from './selectStyles';
 import * as api from '../../api/api';
+import {useSelector} from 'react-redux';
+import {selectors} from 'store';
 
 const positionOptions = [  
   { value: 'catcher', label: 'Catcher' },
@@ -29,7 +31,50 @@ const schoolYearsOptions = [
   { value: "none", label: "None" },
 ];
 
+export interface FormProps {
+  age: number;
+  avatar: string;
+  bats_hand: string;
+  biography?: string;
+  facilities?: {id: string, email: string;}[]
+  feet: number;
+  first_name: string;
+  id: string;
+  inches?: number;
+  last_name: string;
+  position: string;
+  position2?: string;
+  school?: {id: string; name: string;}[];
+  school_year?: string;
+  teams?: {id: string; name: string;}[];
+  throws_hand: string;
+  weight: number;
+}
+
+interface ValuesProps {
+  age: string;
+  bats_hand: string;
+  biography?: string;
+  facilities?: {id: string, email: string;}[]
+  feet: string;
+  first_name: string;
+  inches?: string;
+  last_name: string;
+  position: string;
+  position2?: string;
+  school?: {id: string; name: string;}[];
+  school_year?: string;
+  teams?: {id: string; name: string;}[];
+  throws_hand: string;
+  weight: string;
+}
+
 function UserInformationForm() {
+  const [hasImageChoosed, setHasImageChoosed] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [imageName, setImageName] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>();
+  const user = useSelector(selectors.auth.selectUser);
   const [schoolOptions, setSchoolOptions] = useState([]);
   const [teamOptions, setTeamOptions] = useState([]);
   const [facilitiesOptions, setFacilitiesOptions] = useState([]);
@@ -69,23 +114,102 @@ function UserInformationForm() {
     })
   }, []);
 
-  function onSubmit() {
-    return;
+  function convertBase64(file: File) {
+    return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      }
+      fileReader.onerror = (error) => {
+        reject(error);
+      }
+    })
+  }
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    e.preventDefault();
+    setHasImageChoosed(true);
+    const file = e.target.files![0];
+
+    if (file) {
+      setImageName(file.name);
+      const base64 = await convertBase64(file);
+    
+      if (typeof base64 === 'string') {
+        setPreviewImage(base64);
+      }
+    }
+
+    e.target.value = '';
+  }
+
+  function handleUploadSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (imageName) {
+      api.signPhoto(imageName).then((response) => {
+        const signedUrl = response.data.signedUrl;
+        const imageUrl = signedUrl.split('?')[0];
+
+        if (previewImage) {
+          api.uploadPhoto(signedUrl, previewImage).then(() => {
+            setImageUrl(imageUrl)
+            setHasImageChoosed(false);
+          });
+        }
+      })
+    }
+  }
+
+  function handleCancelUpload() {
+    setPreviewImage(null);
+    setImageName(null);
+    setHasImageChoosed(false);
+  }
+
+  // function handleSubmitForm() {
+  //   e.preventDefault();
+  // }
+
+  // function handleSubmitForm(e: React.FormEvent<HTMLFormElement>, values: valuesProps}) {
+  //   e.preventDefault();
+
+  //   console.log(values);
+  // }
+
+  function onSubmit(values: ValuesProps) {
+
+    if (user.id && imageUrl && values.inches) {
+      api.updateProfile({...values, age: +values.age, feet: +values.feet, inches: +values.inches, weight: +values.weight, id: user.id, avatar: imageUrl}).then(console.log);
+      //сделать отдельные селекты, отправлять только e.value, подготовить данные перед отправкой
+    }
   }
   
   return (
     <Container>
-      <Form>
-        <UserIcon/>
-        <FileInputLabel>Choose Photo
-          <FileInput type='file'/>
+      <Form onSubmit={handleUploadSubmit}>
+        <UserImage src={previewImage ? previewImage :  userImage} alt='user preview image'/>
+        <FileInputLabel>{imageName ? imageName : 'Choose Photo'}
+          <FileInput 
+            type='file' 
+            name="avatarFile" 
+            id="uploadAvatar" 
+            accept="image/png,image/jpeg,image/jpg" 
+            onChange={(e) => handleImageChange(e)}
+          />
         </FileInputLabel>
+        {hasImageChoosed && 
+        <Row>
+          <UploadBtn type='submit'>Upload Photo</UploadBtn>
+          <CancelUploadBtn type='button' onClick={handleCancelUpload}>Cancel</CancelUploadBtn>
+        </Row>}
       </Form>
-      <FinalForm onSubmit={onSubmit} render={(handleSubmit) => (
-        <Form>
+      <FinalForm onSubmit={onSubmit} render={({ handleSubmit }) => (
+        <Form onSubmit={handleSubmit}>
           <FormRow>
             <HalfWidthFieldWrapper>
-              <Field name='firstName' type='text' render={({input}) => (
+              <Field name='first_name' type='text' render={({input}) => (
                 <>
                   <TextInput {...input} type='text' id='firstName' placeholder='First Name*'/>
                   <Label htmlFor='firstName'>First Name*</Label>
@@ -93,7 +217,7 @@ function UserInformationForm() {
               )}/>
             </HalfWidthFieldWrapper>
             <HalfWidthFieldWrapper>
-              <Field name='lastName' render={({input}) => (
+              <Field name='last_name' render={({input}) => (
                 <>
                   <TextInput {...input} type='text' id='lastName' placeholder='Last Name*'/>
                   <Label htmlFor='lastName'>Last Name*</Label>
@@ -102,7 +226,7 @@ function UserInformationForm() {
             </HalfWidthFieldWrapper>
           </FormRow>
           <FullWidthFieldWrapper>
-            <Field name='firstGamePosition' render={({input}) => (
+            <Field name='position' render={({input}) => (
               <SelectWrapper>
                 <Select
                   options={positionOptions}
@@ -115,7 +239,7 @@ function UserInformationForm() {
             )}/>
           </FullWidthFieldWrapper>
           <FullWidthFieldWrapper>
-            <Field name='secondGamePosition' render={({input}) => (
+            <Field name='position2' render={({input}) => (
               <SelectWrapper>
                 <Select
                   options={[{value: "none", label: "-"}, ...positionOptions]}
@@ -161,7 +285,7 @@ function UserInformationForm() {
             </FullWidthFieldWrapper>
           )}/>
           <FormRow>
-            <Field name='throws' render={({input}) => (
+            <Field name='throws_hand' render={({input}) => (
               <HalfWidthFieldWrapper>
                 <SelectWrapper>
                   <Select
@@ -174,7 +298,7 @@ function UserInformationForm() {
                 </SelectWrapper>
               </HalfWidthFieldWrapper>
             )}/>
-            <Field name='bats' render={({input}) => (
+            <Field name='bats_hand' render={({input}) => (
               <HalfWidthFieldWrapper>
                 <SelectWrapper>
                   <Select
@@ -203,7 +327,7 @@ function UserInformationForm() {
             )}/>
           </FullWidthFieldWrapper>
           <FullWidthFieldWrapper>
-            <Field name='school' render={({input}) => (
+            <Field name='school_year' render={({input}) => (
               <SelectWrapper>
                 <Select
                   options={schoolYearsOptions}
@@ -231,7 +355,7 @@ function UserInformationForm() {
           </FullWidthFieldWrapper>
           <CategoryHeader>Facility</CategoryHeader>
           <FullWidthFieldWrapper>
-            <Field name='facility' render={({input}) => (
+            <Field name='facilities' render={({input}) => (
               <SelectWrapper>
                 <Select
                   options={facilitiesOptions}
@@ -245,7 +369,7 @@ function UserInformationForm() {
             )}/>
           </FullWidthFieldWrapper>
           <CategoryHeader>About</CategoryHeader>
-          <Field name='about' render={({input}) => (
+          <Field name='biography' render={({input}) => (
             <FullWidthFieldWrapper>
               <Textarea {...input} id='about' placeholder='Describe yourself in a few words' />
               <Label htmlFor='about'>Describe yourself in a few words</Label>
@@ -268,21 +392,21 @@ const Container = styled.div`
 `
 
 const Form = styled.form`
+  margin-bottom: 23px;
   display: flex;
   flex-direction: column;
   align-items: center;
 `
 
-const UserIcon = styled.div`
-  margin-bottom: 12px;
+const UserImage = styled.img`
+  margin-bottom: 8px;
   width: 100px;
   height: 100px;
-  background-image: url(${userImage});
-  background-size: cover;
+  border-radius: 50%;
 `
 
 const FileInputLabel = styled.label`
-  margin-bottom: 23px;
+  margin-bottom: 10px;
   font-size: 14px;
   font-weight: 400;
   color: #788b99;
@@ -295,6 +419,26 @@ const FileInputLabel = styled.label`
 
 const FileInput = styled.input`
   display: none;
+`
+
+const Row = styled.div`
+  display: flex;
+`
+
+const UploadBtn = styled.button`
+  margin-right: 20px;
+  color: #48bbff;
+  &:hover {
+    text-decoration: underline;
+  }
+`
+
+const CancelUploadBtn = styled(UploadBtn)`
+  margin-right: 0;
+  color: #788b99;
+  &:hover {
+    color: #23527c;
+  }
 `
 
 const FormRow = styled.div`

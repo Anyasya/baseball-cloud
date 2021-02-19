@@ -2,59 +2,69 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Logo from '../Logo';
-import {AppRoutes} from 'routes';
+import {AppRoutes} from 'navigation/routes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import ArrowDown from 'components/ArrowDown';
-import { useDispatch } from 'react-redux';
-import { actions } from 'store';
+import { useDispatch, useSelector } from 'react-redux';
+import { actions, selectors } from 'store';
 
-interface HeaderProps {
-  type: string;
-}
-
-function Header({type}: HeaderProps) {
+function Header() {
   const [hasProfileBtnClicked, setHasProfileBtnClicked] = useState(false);
   const dispatch = useDispatch();
+  const accessToken = useSelector(selectors.auth.selectAccessToken);
+  
+
+  function handleSignOut() {
+    dispatch(actions.auth.signOut());
+    setHasProfileBtnClicked(false);
+  }
 
   return (
     <Root>
-      {type === 'sign' && <Link to={AppRoutes.signIn}><Logo /></Link>}
-      {type === 'main' && 
-      <>
-        <Link to={AppRoutes.signIn}>
+      {accessToken ? 
+      (
+        <>
+          <Link to={AppRoutes.privateRoutes.profile}>
+            <Logo />
+          </Link>
+          <Navigation>
+            <Link to={AppRoutes.privateRoutes.leaderBoard}>
+              <LinkText>Leaderboard</LinkText>
+            </Link>
+            <Link to={AppRoutes.privateRoutes.network}>
+              <LinkText>Network</LinkText>
+            </Link>
+            <Link to={AppRoutes.privateRoutes.profile}>
+              <ProfileIconWrapper>
+                <FontAwesomeIcon icon={faUser}/>
+              </ProfileIconWrapper>
+            </Link>
+            <Button type='button' onClick={() => setHasProfileBtnClicked((prev) => !prev)}>
+              Profile name
+              <ArrowIconWrapper>
+                <ArrowDown/>
+              </ArrowIconWrapper>
+            </Button>
+            {hasProfileBtnClicked && 
+              <ProfileLinksWrapper>
+                <Link to={AppRoutes.privateRoutes.profile}>
+                  <ProfileLinkText>My Profile</ProfileLinkText>
+                </Link>
+                <LogOutBtn type='button' onClick={handleSignOut}>
+                  Log Out
+                </LogOutBtn>
+              </ProfileLinksWrapper>
+            }
+          </Navigation>
+        </>
+      )
+      :
+      (
+        <Link to={AppRoutes.publicRoutes.signIn}>
           <Logo />
         </Link>
-        <Navigation>
-          <Link to={AppRoutes.leaderBoard}>
-            <LinkText>Leaderboard</LinkText>
-          </Link>
-          <Link to={AppRoutes.network}>
-            <LinkText>Network</LinkText>
-          </Link>
-          <Link to={AppRoutes.profile}>
-            <ProfileIconWrapper>
-              <FontAwesomeIcon icon={faUser}/>
-            </ProfileIconWrapper>
-          </Link>
-          <Button type='button' onClick={() => setHasProfileBtnClicked((prev) => !prev)}>
-            Profile name
-            <ArrowIconWrapper>
-              <ArrowDown/>
-            </ArrowIconWrapper>
-          </Button>
-          {hasProfileBtnClicked && 
-            <ProfileLinksWrapper>
-              <Link to={AppRoutes.profile}>
-                <ProfileLinkText>My Profile</ProfileLinkText>
-              </Link>
-              <LogOutBtn type='button' onClick={() => dispatch(actions.auth.signOut())}>
-                Log Out
-              </LogOutBtn>
-            </ProfileLinksWrapper>
-          }
-        </Navigation>
-      </>}
+      )}
     </Root>
   );
 }

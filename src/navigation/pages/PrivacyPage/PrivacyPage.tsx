@@ -1,14 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import './style.css';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
+import bgImage from 'assets/img/authBg.png';
 
 function PrivacyPage() {
   return (
     <Container>
-      <Header type='sign'/>
-      <Main className='main'>
+      <Header/>
+      <Main>
         <Wrapper>
           <h2>Privacy Policy</h2>
           <Date>Last updated May 08, 2018</Date>
@@ -127,6 +127,9 @@ const Main = styled.main`
   padding: 15px;
   width: 100%;
   overflow-y: scroll;
+  background-image: url(${bgImage});
+  background-position: top center;
+  background-size: cover;
 `
 
 const Wrapper = styled.div`
@@ -175,7 +178,6 @@ const Wrapper = styled.div`
     margin-bottom: 12px;
   }
 `
-
 const Date = styled.p`
   margin-bottom: 24px !important;
 `

@@ -1,14 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import './style.css';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import bgImage from 'assets/img/authBg.png';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
 
 function TermsPage() {
   return (
     <Container>
-      <Header type='sign'/>
-      <Main className='main'>
+      <Header/>
+      <Main>
         <Wrapper>
           <h2>Terms and Conditions</h2>
           <Date>Last updated May 09, 2018</Date>
@@ -121,6 +121,9 @@ const Main = styled.main`
   padding: 15px;
   width: 100%;
   overflow-y: scroll;
+  background-image: url(${bgImage});
+  background-position: top center;
+  background-size: cover;
 `
 
 const Wrapper = styled.div`

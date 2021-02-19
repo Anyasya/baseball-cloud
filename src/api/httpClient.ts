@@ -19,17 +19,26 @@ import axios, {
     if (!config.withToken) {
       return config;
     }
-    const {accessToken, client, uid} = store?.getState().auth;
+    // const {accessToken, client, uid} = store?.getState().auth;
+    let accessData = null;
+
+    if (localStorage.getItem('accessData')) {
+      const localAccessData = localStorage.getItem('accessData');
+      const parsedAccessData = JSON.parse(localAccessData!);
+      accessData = parsedAccessData;
+    }
+
+    // const accessData = JSON.parse(localStorage.getItem('accessData') ? localStorage.getItem('accessData') : null);
   
-    if (!accessToken) {
+    if (!accessData) {
       return config;
     }
   
     const headers = {
       ...config.headers,
-      client,
-      uid,
-      "access-token": accessToken,
+      "client": accessData.client,
+      "uid": accessData.uid,
+      "access-token": accessData.accessToken,
     };
   
     return {...config, headers};

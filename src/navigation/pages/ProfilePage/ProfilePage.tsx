@@ -1,14 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import './style.css';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import UserInformationForm from '../../components/UserInformationForm';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
+import UserInformationForm from '../../../components/UserInformationForm';
 
-function MainPage() {
+function ProfilePage() {
   return (
     <Container>
-      <Header type='main'/>
+      <Header/>
       <Main>
         <UserBlock>
           <UserInformationForm />
@@ -22,7 +21,7 @@ function MainPage() {
   );
 }
 
-export default MainPage;
+export default ProfilePage;
 
 const Container = styled.div`
   height: 100vh;

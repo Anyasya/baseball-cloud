@@ -1,22 +1,21 @@
-import { AppRoutes } from './../../routes';
 import {createAsyncThunk, createReducer, createAction} from '@reduxjs/toolkit';
 import {RootState} from 'store';
 import * as api from 'api/api';
-import History from '../../services/history';
 // import {handleAsyncError} from 'store/utils';
 
-const setAccessData = createAction<{accessToken: string, client: string, uid: string}>('auth/setAccessData');
+const setAccessUserData = createAction<{accessToken: string, client: string, uid: string, user: {id: string; email: string, role: string}}>('auth/setAccessData');
 
 const signIn = createAsyncThunk(
   'auth/signIn',
   async (data: any) => {
     try {
       const response = await api.signIn(data.email, data.password);
-      const {email, id} = response.data.data;
+      const {email, id, role} = response.data.data;
       const accessToken = response.headers['access-token'];
       const client = response.headers.client;
       const uid = response.headers.uid;
       localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
+      localStorage.setItem('user', JSON.stringify({email, id, role}));
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -30,11 +29,12 @@ const signUp = createAsyncThunk(
   async (data: any) => {
     try {
       const response = await api.signUp(data.email, data.password, data.password_confirmation, data.role);
-      const {email, id} = response.data.data;
+      const {email, id, role} = response.data.data;
       const accessToken = response.headers['access-token'];
       const client = response.headers.client;
       const uid = response.headers.uid;
       localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
+      localStorage.setItem('user', JSON.stringify({email, id, role}));
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -44,29 +44,33 @@ const signUp = createAsyncThunk(
 
 const signOut = createAsyncThunk('auth/signOut', () => {
   localStorage.removeItem('accessData');
-  History.push(AppRoutes.signIn);
+  localStorage.removeItem('user');
+  // History.push(AppRoutes.signIn);
 });
 
-export const reducer = createReducer(
-  {
-    accessToken: null as string | null,
-    client: null as string | null,
-    uid: null as string | null,
-    isSignUpLoading: false,
-    isSignInLoading: false,
-    isSignOutLoading: false,
-    user: {
-      id: null as string | null,
-      email: null as string | null,
-    },
-    hasSignPassed: false,
+const initialState = {
+  accessToken: null as string | null,
+  client: null as string | null,
+  uid: null as string | null,
+  isSignUpLoading: false,
+  isSignInLoading: false,
+  isSignOutLoading: false,
+  user: {
+    id: null as string | null,
+    email: null as string | null,
   },
+  hasSignPassed: false,
+}
+
+export const reducer = createReducer(
+  initialState,
   (builder) => {
-    builder.addCase(setAccessData, (state, action) => {
-      const {accessToken, client, uid} = action.payload;
+    builder.addCase(setAccessUserData, (state, action) => {
+      const {accessToken, client, uid, user} = action.payload;
       state.accessToken = accessToken;
       state.client = client;
       state.uid = uid;
+      state.user = user;
     });
 
     builder
@@ -91,7 +95,13 @@ export const reducer = createReducer(
         state.isSignOutLoading = true;
       })
       .addCase(signOut.fulfilled, (state) => {
+        state.accessToken = null;
+        state.client = null;
+        state.uid = null;
         state.isSignOutLoading = false;
+        state.hasSignPassed = false;
+        state.user.id = null;
+        state.user.email = null; 
       })
       .addCase(signOut.rejected, (state) => {
         state.isSignOutLoading = false;
@@ -119,7 +129,7 @@ export const actions = {
   signUp,
   signIn,
   signOut,
-  setAccessData,
+  setAccessUserData,
 };
 
 export const selectors = {
@@ -132,5 +142,5 @@ export const selectors = {
   },
   selectClient: (state: RootState) => state.auth.client,
   selectUid: (state: RootState) => state.auth.uid,
-  selectHasSignPassed: (state: RootState) => state.auth.hasSignPassed,
+  selectUser: (state: RootState) => state.auth.user,
 };
