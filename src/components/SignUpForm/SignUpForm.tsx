@@ -4,7 +4,7 @@ import {Form as FinalForm, Field} from 'react-final-form';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser, faLock, faCheck} from '@fortawesome/free-solid-svg-icons';
 import {Link} from 'react-router-dom';
-import ConfirmIcon from '../ConfirmIcon';
+import ConfirmIcon from '../Icons/ConfirmIcon';
 import { useDispatch } from 'react-redux';
 import { actions } from 'store';
 

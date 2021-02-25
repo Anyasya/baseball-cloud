@@ -4,28 +4,12 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import styled from 'styled-components';
 import bgImage from 'assets/img/authBg.png';
-// import { selectors } from 'store';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { useHistory } from 'react-router-dom';
-// import { actions } from 'store';
+import {selectors} from 'store';
+import { useSelector } from 'react-redux';
+import Spinner from 'components/Loader';
 
 function SignInPage() {
-  // const history = useHistory();
-  // const hasSignPassed = useSelector(selectors.auth.selectHasSignPassed);
-  // const accessData = localStorage.getItem('accessData');
-  // const dispatch = useDispatch();
-
-  // useEffect(() => { 
-  //   if (hasSignPassed) {
-  //     history.push('/profile');
-  //   }
-
-  //   if (accessData) {
-  //     const parsedData = JSON.parse(accessData);
-  //     dispatch(actions.auth.setAccessData(parsedData));
-  //     history.push('/profile');
-  //   } 
-  // }, [hasSignPassed, history, accessData, dispatch]);
+  const isSignInLoading = useSelector(selectors.auth.selectIsSignInLoading);
 
   return (
     <Container>
@@ -33,7 +17,8 @@ function SignInPage() {
       <Main>
         <SignInForm />
       </Main>
-      <Footer />
+      <Footer/>
+      {isSignInLoading && <Spinner/>}
     </Container>
   );
 }
@@ -45,6 +30,7 @@ const Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 `
 
 const Main = styled.main`

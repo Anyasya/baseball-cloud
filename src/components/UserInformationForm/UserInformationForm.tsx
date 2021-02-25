@@ -5,15 +5,14 @@ import userImage from '../../assets/img/userIconBig.png';
 import Select from 'react-select';
 import {customSelectStyles} from './selectStyles';
 import * as api from '../../api/api';
-import {useSelector} from 'react-redux';
-import {selectors} from 'store';
+import {CurrentUser} from 'navigation/pages/ProfilePage';
 
 const positionOptions = [  
   { value: 'catcher', label: 'Catcher' },
-  { value: 'firstBase', label: 'First Base' },
-  { value: 'secondBase', label: 'Second Base' },
+  { value: 'first_base', label: 'First Base' },
+  { value: 'second_base', label: 'Second Base' },
   { value: 'shortstop', label: 'Shortstop' },
-  { value: 'thirdBase', label: 'Third Base' },
+  { value: 'third_base', label: 'Third Base' },
   { value: 'outfield', label: 'Outfield' },
   { value: 'pitcher', label: 'Pitcher' },
 ];
@@ -33,20 +32,20 @@ const schoolYearsOptions = [
 
 export interface FormProps {
   age: number;
-  avatar: string;
+  avatar: string | undefined;
   bats_hand: string;
   biography?: string;
-  facilities?: {id: string, email: string;}[]
+  facilities?: {id: string, email: string, u_name:string}[];
   feet: number;
   first_name: string;
   id: string;
-  inches?: number;
+  inches?: number | undefined;
   last_name: string;
   position: string;
   position2?: string;
-  school?: {id: string; name: string;}[];
+  school?: {id: string, name: string}[];
   school_year?: string;
-  teams?: {id: string; name: string;}[];
+  teams?: {id: string, name: string}[];
   throws_hand: string;
   weight: number;
 }
@@ -55,31 +54,55 @@ interface ValuesProps {
   age: string;
   bats_hand: string;
   biography?: string;
-  facilities?: {id: string, email: string;}[]
+  facilities?: {value: {id: string, email: string, u_name:string}, label: string}[];
   feet: string;
   first_name: string;
   inches?: string;
   last_name: string;
   position: string;
   position2?: string;
-  school?: {id: string; name: string;}[];
+  school?: {id: string, name: string}[];
   school_year?: string;
-  teams?: {id: string; name: string;}[];
+  teams?: {value: string, label: string}[];
   throws_hand: string;
   weight: string;
 }
 
-function UserInformationForm() {
+interface UserInformationFormProps {
+  currentUser?: CurrentUser;
+  hideUserInfoForm: () => void;
+  onSubmit: (values: ValuesProps, imageUrl: string) => void;
+}
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface FacilitiesSelectOption {
+  value: {
+    id: string;
+    email: string;
+    u_name: string;
+  };
+  label: string;
+}
+
+function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInformationFormProps) {
   const [hasImageChoosed, setHasImageChoosed] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [imageName, setImageName] = useState<string | null>(null);
+  const [avatarBlob, setAvatarBlob] = useState<Blob | null>(null);
+  const [imageName, setImageName] = useState<string | undefined>();
   const [imageUrl, setImageUrl] = useState<string>();
-  const user = useSelector(selectors.auth.selectUser);
-  const [schoolOptions, setSchoolOptions] = useState([]);
-  const [teamOptions, setTeamOptions] = useState([]);
-  const [facilitiesOptions, setFacilitiesOptions] = useState([]);
+  const [schoolOptions, setSchoolOptions] = useState<SelectOption[]>([]);
+  const [teamOptions, setTeamOptions] = useState<SelectOption[]>([]);
+  const [facilitiesOptions, setFacilitiesOptions] = useState<FacilitiesSelectOption[]>([]);
 
   useEffect(() => {
+    if (currentUser?.avatar) {
+      setPreviewImage(currentUser.avatar);
+      setImageUrl(currentUser.avatar);
+    }
+
     api.getSchools().then((response) => {
       const schools = response.data.data.schools.schools.map((item: {id: string, name: string}) => {
         return {
@@ -103,16 +126,16 @@ function UserInformationForm() {
     })
 
     api.getFacilities().then((response) => {
-      const facilities = response.data.data.facilities.facilities.map((item: {id: string, u_name: string}) => {
+      const facilities = response.data.data.facilities.facilities.map((item: {id: string, email: string, u_name: string}) => {
         return {
-          value: item.id,
+          value: {id: item.id, email: item.email, u_name: item.u_name},
           label: item.u_name
         };
       });
 
       setFacilitiesOptions(facilities);
     })
-  }, []);
+  }, [currentUser?.avatar]);
 
   function convertBase64(file: File) {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -131,6 +154,8 @@ function UserInformationForm() {
     e.preventDefault();
     setHasImageChoosed(true);
     const file = e.target.files![0];
+    const blob = new Blob([file], { type: file.type });
+    setAvatarBlob(blob);
 
     if (file) {
       setImageName(file.name);
@@ -152,8 +177,8 @@ function UserInformationForm() {
         const signedUrl = response.data.signedUrl;
         const imageUrl = signedUrl.split('?')[0];
 
-        if (previewImage) {
-          api.uploadPhoto(signedUrl, previewImage).then(() => {
+        if (avatarBlob) {
+          api.uploadPhoto(signedUrl, avatarBlob).then(() => {
             setImageUrl(imageUrl)
             setHasImageChoosed(false);
           });
@@ -164,32 +189,14 @@ function UserInformationForm() {
 
   function handleCancelUpload() {
     setPreviewImage(null);
-    setImageName(null);
+    setImageName(undefined);
     setHasImageChoosed(false);
-  }
-
-  // function handleSubmitForm() {
-  //   e.preventDefault();
-  // }
-
-  // function handleSubmitForm(e: React.FormEvent<HTMLFormElement>, values: valuesProps}) {
-  //   e.preventDefault();
-
-  //   console.log(values);
-  // }
-
-  function onSubmit(values: ValuesProps) {
-
-    if (user.id && imageUrl && values.inches) {
-      api.updateProfile({...values, age: +values.age, feet: +values.feet, inches: +values.inches, weight: +values.weight, id: user.id, avatar: imageUrl}).then(console.log);
-      //сделать отдельные селекты, отправлять только e.value, подготовить данные перед отправкой
-    }
   }
   
   return (
     <Container>
       <Form onSubmit={handleUploadSubmit}>
-        <UserImage src={previewImage ? previewImage :  userImage} alt='user preview image'/>
+        <UserImage src={previewImage ? previewImage :  userImage} alt='user`s preview image'/>
         <FileInputLabel>{imageName ? imageName : 'Choose Photo'}
           <FileInput 
             type='file' 
@@ -205,7 +212,7 @@ function UserInformationForm() {
           <CancelUploadBtn type='button' onClick={handleCancelUpload}>Cancel</CancelUploadBtn>
         </Row>}
       </Form>
-      <FinalForm onSubmit={onSubmit} render={({ handleSubmit }) => (
+      <FinalForm onSubmit={(values: ValuesProps) => {if (imageUrl) {onSubmit(values, imageUrl)}}} initialValues={currentUser} render={({ handleSubmit }) => (
         <Form onSubmit={handleSubmit}>
           <FormRow>
             <HalfWidthFieldWrapper>
@@ -229,6 +236,7 @@ function UserInformationForm() {
             <Field name='position' render={({input}) => (
               <SelectWrapper>
                 <Select
+                  value={positionOptions.find(option => option.value === input.value)}
                   options={positionOptions}
                   label='Position in Game*'
                   placeholder='Position in Game*'
@@ -242,6 +250,7 @@ function UserInformationForm() {
             <Field name='position2' render={({input}) => (
               <SelectWrapper>
                 <Select
+                  value={positionOptions.find(option => option.value === input.value)}
                   options={[{value: "none", label: "-"}, ...positionOptions]}
                   label='Secondary Position in Game*'
                   placeholder='Secondary Position in Game*'
@@ -255,7 +264,7 @@ function UserInformationForm() {
           <FullWidthFieldWrapper>
             <Field name='age' render={({input}) => (
               <>
-                <TextInput {...input} type='text' id='age' placeholder='Age*'/>
+                <TextInput {...input} type='string' id='age' placeholder='Age*'/>
                 <Label htmlFor='age'>Age*</Label>
               </>
             )}/>
@@ -264,7 +273,7 @@ function UserInformationForm() {
             <HalfWidthFieldWrapper>
               <Field name='feet' render={({input}) => (
                   <>
-                    <TextInput {...input} type='text' id='feet' placeholder='Feet*'/>
+                    <TextInput {...input} type='string' id='feet' placeholder='Feet*'/>
                     <Label htmlFor='feet'>Feet*</Label>
                   </>
                 )}/>
@@ -272,7 +281,7 @@ function UserInformationForm() {
             <HalfWidthFieldWrapper>
               <Field name='inches' render={({input}) => (
                   <>
-                    <TextInput {...input} type='text' id='inches' placeholder='Inches'/>
+                    <TextInput {...input} type='string' id='inches' placeholder='Inches'/>
                     <Label htmlFor='inches'>Inches*</Label>
                   </>
                 )}/>
@@ -280,7 +289,7 @@ function UserInformationForm() {
           </ZeroMarginRow>
           <Field name='weight' render={({input}) => (
             <FullWidthFieldWrapper>
-              <TextInput {...input} type='text' id='weight' placeholder='Weight*'/>
+              <TextInput {...input} type='string' id='weight' placeholder='Weight*'/>
               <Label htmlFor='weight'>Weight*</Label>
             </FullWidthFieldWrapper>
           )}/>
@@ -289,6 +298,7 @@ function UserInformationForm() {
               <HalfWidthFieldWrapper>
                 <SelectWrapper>
                   <Select
+                    value={handsOptions.find(option => option.value === input.value)}
                     options={handsOptions}
                     label='Throws*'
                     placeholder='Throws*'
@@ -302,6 +312,7 @@ function UserInformationForm() {
               <HalfWidthFieldWrapper>
                 <SelectWrapper>
                   <Select
+                    value={handsOptions.find(option => option.value === input.value)}
                     options={handsOptions}
                     label='Bats*'
                     placeholder='Bats*'
@@ -317,11 +328,12 @@ function UserInformationForm() {
             <Field name='school' render={({input}) => (
               <SelectWrapper>
                 <Select
+                  value={schoolOptions.find(option => option.value === input.value.id)}
                   options={schoolOptions}
                   label='School'
                   placeholder='School'
                   styles={customSelectStyles}
-                  onChange={(e) => input.onChange(e?.value)}
+                  onChange={(option) => input.onChange({id: option?.value, name: option?.label})} 
                 />
               </SelectWrapper>
             )}/>
@@ -330,11 +342,12 @@ function UserInformationForm() {
             <Field name='school_year' render={({input}) => (
               <SelectWrapper>
                 <Select
+                  value={schoolYearsOptions.find(option => option.value === input.value)}
                   options={schoolYearsOptions}
                   label='School Year'
                   placeholder='School Year'
                   styles={customSelectStyles}
-                  onChange={(value) => input.onChange(value)}
+                  onChange={(e) => input.onChange(e?.value)}
                 />
               </SelectWrapper>
             )}/>
@@ -343,12 +356,14 @@ function UserInformationForm() {
             <Field name='teams' render={({input}) => (
               <SelectWrapper>
                 <Select
+                  value={teamOptions.filter(option => input.value.find((item: {id: string; name: string}) => item.id === option.value))}
                   options={teamOptions}
                   label='Team'
                   placeholder='Team'
                   styles={customSelectStyles}
                   isMulti={true}
-                  onChange={(value) => input.onChange(value)}
+                  //@ts-ignore
+                  onChange={(value) => input.onChange(value?.map(item => ({id: item.value, name: item.label})))}
                 />
               </SelectWrapper>
             )}/>
@@ -358,12 +373,15 @@ function UserInformationForm() {
             <Field name='facilities' render={({input}) => (
               <SelectWrapper>
                 <Select
+                  value={facilitiesOptions.filter(option => input.value.find((item: {id: string; email: string; u_name: string}) => item.id === option.value.id))}
                   options={facilitiesOptions}
                   label='Facility'
                   placeholder='Facility'
+                  // @ts-ignore
                   styles={customSelectStyles}
                   isMulti={true}
-                  onChange={(value) => input.onChange(value)}
+                  // @ts-ignore
+                  onChange={(value) => input.onChange(value?.map(item => ({id: item.value.id, email: item.value.email, u_name: item.value.u_name})))}
                 />
               </SelectWrapper>
             )}/>
@@ -376,7 +394,7 @@ function UserInformationForm() {
             </FullWidthFieldWrapper>
           )}/>
           <FormRow>
-            <CancelBtn type='button'>Cancel</CancelBtn>
+            <CancelBtn type='button' onClick={() => hideUserInfoForm()}>Cancel</CancelBtn>
             <SubmitBtn type='submit'>Save</SubmitBtn>
           </FormRow>
         </Form>

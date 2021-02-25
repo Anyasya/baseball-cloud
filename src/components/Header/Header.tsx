@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import Logo from '../Logo';
+import Logo from '../Icons/Logo';
 import {AppRoutes} from 'navigation/routes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import ArrowDown from 'components/ArrowDown';
+import ArrowDown from 'components/Icons/ArrowDown';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions, selectors } from 'store';
 

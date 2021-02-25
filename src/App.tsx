@@ -12,7 +12,6 @@ import SignUpPage from 'navigation/pages/SignUpPage';
 import ProfilePage from 'navigation/pages/ProfilePage';
 import LeaderBoard from 'navigation/pages/LeaderBoard';
 import {AppRoutes} from 'navigation/routes';
-// import { validateToken } from 'api/api';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {actions} from 'store';
@@ -22,18 +21,6 @@ function App() {
   const history = useHistory();
   const localAccessData = localStorage.getItem('accessData');
   const localUserData = localStorage.getItem('user');
-  // const hasSignPassed = useSelector(selectors.auth.selectHasSignPassed);
-  // const [hasUserValidated, setHasUserValidated] = useState(false);
-  
-  // useEffect(() => {
-  //   if (localAccessData) {
-  //     const parsedAccessData = JSON.parse(localAccessData);
-  //     dispatch(actions.auth.setAccessData(parsedAccessData));
-  //     history.push(AppRoutes.privateRoutes.profile);
-  //   } else {
-  //     history.push(AppRoutes.publicRoutes.signIn);
-  //   }
-  // }, [dispatch, history, localAccessData]);
 
   useEffect(() => {
     if (!localAccessData) {
@@ -57,11 +44,6 @@ function App() {
       }
     }
   }, [dispatch, history, localAccessData, localUserData]);
-
-  // validateToken().then((response: any) => {
-  // const payload = {accessToken: response.headers['access-token'], client: response.headers.client, uid: response.headers.uid};
-  // dispatch(actions.auth.setAccessData(payload));
-  // setHasUserValidated(true);
 
   return (
     <Switch>

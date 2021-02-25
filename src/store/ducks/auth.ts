@@ -1,9 +1,13 @@
 import {createAsyncThunk, createReducer, createAction} from '@reduxjs/toolkit';
 import {RootState} from 'store';
 import * as api from 'api/api';
+import History from 'services/history';
+import {AppRoutes} from 'navigation/routes';
 // import {handleAsyncError} from 'store/utils';
 
 const setAccessUserData = createAction<{accessToken: string, client: string, uid: string, user: {id: string; email: string, role: string}}>('auth/setAccessData');
+
+const setProfileInfo = createAction<{avatar: string, firstName: string, lastName: string}>('auth/setProfileInfo');
 
 const signIn = createAsyncThunk(
   'auth/signIn',
@@ -16,6 +20,7 @@ const signIn = createAsyncThunk(
       const uid = response.headers.uid;
       localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
       localStorage.setItem('user', JSON.stringify({email, id, role}));
+      History.push(AppRoutes.privateRoutes.profile);
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -35,6 +40,7 @@ const signUp = createAsyncThunk(
       const uid = response.headers.uid;
       localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
       localStorage.setItem('user', JSON.stringify({email, id, role}));
+      History.push(AppRoutes.privateRoutes.profile);
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -45,7 +51,7 @@ const signUp = createAsyncThunk(
 const signOut = createAsyncThunk('auth/signOut', () => {
   localStorage.removeItem('accessData');
   localStorage.removeItem('user');
-  // History.push(AppRoutes.signIn);
+  History.push(AppRoutes.publicRoutes.signIn);
 });
 
 const initialState = {
@@ -56,8 +62,12 @@ const initialState = {
   isSignInLoading: false,
   isSignOutLoading: false,
   user: {
+    role: null as string | null,
     id: null as string | null,
     email: null as string | null,
+    avatar: null as string | null,
+    firstName: null as string | null,
+    lastName: null as string | null,
   },
   hasSignPassed: false,
 }
@@ -70,7 +80,16 @@ export const reducer = createReducer(
       state.accessToken = accessToken;
       state.client = client;
       state.uid = uid;
-      state.user = user;
+      state.user.id = user.id;
+      state.user.email = user.email;
+      state.user.role = user.role;
+    });
+
+    builder.addCase(setProfileInfo, (state, action) => {
+      const {avatar, firstName, lastName} = action.payload;
+      state.user.avatar = avatar;
+      state.user.firstName = firstName;
+      state.user.lastName = lastName;
     });
 
     builder
@@ -82,7 +101,8 @@ export const reducer = createReducer(
         state.accessToken = accessToken;
         state.uid = uid;
         state.client = client;
-        state.user = {id, email};
+        state.user.id = id;
+        state.user.email = email;
         state.isSignInLoading = false;
         state.hasSignPassed = true;
       })
@@ -116,7 +136,8 @@ export const reducer = createReducer(
         state.accessToken = accessToken;
         state.uid = uid;
         state.client = client;
-        state.user = {id, email};
+        state.user.id = id;
+        state.user.email = email;
         state.isSignUpLoading = false;
       })
       .addCase(signUp.rejected, (state) => {
@@ -130,6 +151,7 @@ export const actions = {
   signIn,
   signOut,
   setAccessUserData,
+  setProfileInfo,
 };
 
 export const selectors = {
@@ -137,7 +159,10 @@ export const selectors = {
   selectIsSignInLoading: (state: RootState) => {
     return state.auth.isSignInLoading;
   },
-  selectSigningOutStatus: (state: RootState) => {
+  selectIsSignUpLoading: (state: RootState) => {
+    return state.auth.isSignUpLoading;
+  },
+  selectIsSignOutloading: (state: RootState) => {
     return state.auth.isSignOutLoading;
   },
   selectClient: (state: RootState) => state.auth.client,

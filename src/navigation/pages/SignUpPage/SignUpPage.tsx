@@ -4,8 +4,13 @@ import Footer from '../../../components/Footer';
 import bgImage from 'assets/img/authBg.png';
 import SignUpForm from '../../../components/SignUpForm';
 import styled from 'styled-components';
+import {selectors} from 'store';
+import { useSelector } from 'react-redux';
+import Spinner from 'components/Loader';
 
 function SignUpPage() {
+  const isSignUpLoading = useSelector(selectors.auth.selectIsSignUpLoading);
+
   return (
     <Container>
       <Header/>
@@ -13,6 +18,7 @@ function SignUpPage() {
         <SignUpForm />
       </Main>
       <Footer />
+      {isSignUpLoading && <Spinner />}
     </Container>
   );
 }
@@ -24,6 +30,7 @@ const Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 `
 
 const Main = styled.main`

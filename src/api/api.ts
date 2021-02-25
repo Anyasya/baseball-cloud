@@ -27,8 +27,8 @@ export async function signPhoto(name: string) {
   return httpClient.post('s3/signed_url', {name});
 }
 
-export async function uploadPhoto(url: string, base64: string) {
-  return axios.put(url, base64);
+export async function uploadPhoto(url: string, blob: Blob) {
+  return axios.put(url, blob);
 }
 
 export function validateToken() {
@@ -45,6 +45,10 @@ export function getTeams() {
 
 export function getFacilities() {
   return httpClient.post('/graphql', queries.getFacilitiesQuery());
+}
+
+export function getCurrentProfile(id: string) {
+  return httpClient.post('/graphql', queries.getCurrentProfileQuery(id));
 }
 
 export function updateProfile(form: FormProps) {
