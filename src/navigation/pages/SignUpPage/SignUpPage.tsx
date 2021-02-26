@@ -6,7 +6,7 @@ import SignUpForm from '../../../components/SignUpForm';
 import styled from 'styled-components';
 import {selectors} from 'store';
 import { useSelector } from 'react-redux';
-import Spinner from 'components/Loader';
+import Spinner from 'components/Spinner';
 
 function SignUpPage() {
   const isSignUpLoading = useSelector(selectors.auth.selectIsSignUpLoading);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Logo from '../Icons/Logo';
@@ -13,11 +13,26 @@ function Header() {
   const [hasProfileBtnClicked, setHasProfileBtnClicked] = useState(false);
   const dispatch = useDispatch();
   const accessToken = useSelector(selectors.auth.selectAccessToken);
-  
+  const user = useSelector(selectors.auth.selectUser);
+
+  useEffect(() => {
+    function hideProfileOptions() {
+      setHasProfileBtnClicked(false);
+    }
+
+    window.addEventListener('click', hideProfileOptions);
+
+    return () => window.removeEventListener('click', hideProfileOptions);
+  }, []);
 
   function handleSignOut() {
     dispatch(actions.auth.signOut());
     setHasProfileBtnClicked(false);
+  }
+
+  function handleProfileBtnClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    setHasProfileBtnClicked((prev) => !prev)
   }
 
   return (
@@ -36,18 +51,18 @@ function Header() {
               <LinkText>Network</LinkText>
             </Link>
             <Link to={AppRoutes.privateRoutes.profile}>
-              <ProfileIconWrapper>
-                <FontAwesomeIcon icon={faUser}/>
+              <ProfileIconWrapper $imageUrl={user?.avatar}>
+                {user.avatar ? null : <FontAwesomeIcon icon={faUser}/>}
               </ProfileIconWrapper>
             </Link>
-            <Button type='button' onClick={() => setHasProfileBtnClicked((prev) => !prev)}>
-              Profile name
+            <Button type='button' onClick={handleProfileBtnClick}>
+              {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Profile name'}
               <ArrowIconWrapper>
                 <ArrowDown/>
               </ArrowIconWrapper>
             </Button>
             {hasProfileBtnClicked && 
-              <ProfileLinksWrapper>
+              <ProfileLinksWrapper onClick={(e) => e.stopPropagation()}>
                 <Link to={AppRoutes.privateRoutes.profile}>
                   <ProfileLinkText>My Profile</ProfileLinkText>
                 </Link>
@@ -87,7 +102,7 @@ const Navigation = styled.nav`
   position: relative;
 `
 
-const ProfileIconWrapper = styled.div`
+const ProfileIconWrapper = styled.div<{$imageUrl?: string | null}>`
   margin: 0 10px;
   padding: 5px 9px;
   width: 32px;
@@ -95,6 +110,8 @@ const ProfileIconWrapper = styled.div`
   border-radius: 50%;
   background-color: #d1d7db;
   box-sizing: border-box;
+  ${({ $imageUrl }) => $imageUrl && `background-image: url(${$imageUrl});`}
+  background-size: cover;
 `
 
 const LinkText = styled.p`

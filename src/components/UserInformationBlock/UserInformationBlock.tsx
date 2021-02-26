@@ -22,8 +22,13 @@ function UserInformationBlock({currentUser, openUserInfoForm}: UserInformationBl
       <UserInfoWrapper>
         <UserImage src={currentUser?.avatar ? currentUser?.avatar : userIcon} alt={`User photo - ${currentUser?.first_name} ${currentUser?.last_name}`}/>
         <UserName>{`${currentUser?.first_name} ${currentUser?.last_name}`}</UserName>
-        <FirstPosition>{currentUser?.position}</FirstPosition>
-        {currentUser?.position2 && <SecondPosition>{currentUser?.position2}</SecondPosition>}
+        <FirstPosition>
+          {currentUser?.position.split('_').map((item) => item.charAt(0).toUpperCase() + item.slice(1)).join(' ')}
+        </FirstPosition>
+        {currentUser?.position2 && 
+          <SecondPosition>
+            {currentUser?.position2.split('_').map((item) => item.charAt(0).toUpperCase() + item.slice(1)).join(' ')}
+          </SecondPosition>}
         <EditBtn type='button' onClick={() => openUserInfoForm()}>
           <FontAwesomeIcon icon={faPen}/>
         </EditBtn>
@@ -92,7 +97,7 @@ function UserInformationBlock({currentUser, openUserInfoForm}: UserInformationBl
 export default UserInformationBlock;
 
 const Container = styled.div`
-  width: 250px;
+  width: 264px;
 `
 
 const UserInfoWrapper = styled.div`

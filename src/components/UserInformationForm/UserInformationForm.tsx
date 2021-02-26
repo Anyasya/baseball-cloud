@@ -6,6 +6,9 @@ import Select from 'react-select';
 import {customSelectStyles} from './selectStyles';
 import * as api from '../../api/api';
 import {CurrentUser} from 'navigation/pages/ProfilePage';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import Loader from 'react-loader-spinner';
+
 
 const positionOptions = [  
   { value: 'catcher', label: 'Catcher' },
@@ -32,7 +35,7 @@ const schoolYearsOptions = [
 
 export interface FormProps {
   age: number;
-  avatar: string | undefined;
+  avatar?: string | undefined;
   bats_hand: string;
   biography?: string;
   facilities?: {id: string, email: string, u_name:string}[];
@@ -71,7 +74,7 @@ interface ValuesProps {
 interface UserInformationFormProps {
   currentUser?: CurrentUser;
   hideUserInfoForm: () => void;
-  onSubmit: (values: ValuesProps, imageUrl: string) => void;
+  onSubmit: (values: ValuesProps, imageUrl: string | undefined) => void;
 }
 interface SelectOption {
   value: string;
@@ -89,19 +92,21 @@ interface FacilitiesSelectOption {
 
 function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInformationFormProps) {
   const [hasImageChoosed, setHasImageChoosed] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(currentUser?.avatar || null);
   const [avatarBlob, setAvatarBlob] = useState<Blob | null>(null);
   const [imageName, setImageName] = useState<string | undefined>();
-  const [imageUrl, setImageUrl] = useState<string>();
+  const [imageUrl, setImageUrl] = useState<string | undefined>(currentUser?.avatar);
   const [schoolOptions, setSchoolOptions] = useState<SelectOption[]>([]);
   const [teamOptions, setTeamOptions] = useState<SelectOption[]>([]);
   const [facilitiesOptions, setFacilitiesOptions] = useState<FacilitiesSelectOption[]>([]);
+  const [isPhotoUploading, setIsPhotoUploading] = useState(false);
+  const [isFormUploading, setIsFormUploading] = useState(false);
 
   useEffect(() => {
-    if (currentUser?.avatar) {
-      setPreviewImage(currentUser.avatar);
-      setImageUrl(currentUser.avatar);
-    }
+    // if (currentUser?.avatar) {
+    //   setPreviewImage(currentUser.avatar);
+    //   setImageUrl(currentUser.avatar);
+    // }
 
     api.getSchools().then((response) => {
       const schools = response.data.data.schools.schools.map((item: {id: string, name: string}) => {
@@ -135,7 +140,7 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
 
       setFacilitiesOptions(facilities);
     })
-  }, [currentUser?.avatar]);
+  }, []);
 
   function convertBase64(file: File) {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -173,6 +178,8 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
     e.preventDefault();
 
     if (imageName) {
+      setHasImageChoosed(false);
+      setIsPhotoUploading(true);
       api.signPhoto(imageName).then((response) => {
         const signedUrl = response.data.signedUrl;
         const imageUrl = signedUrl.split('?')[0];
@@ -180,7 +187,7 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
         if (avatarBlob) {
           api.uploadPhoto(signedUrl, avatarBlob).then(() => {
             setImageUrl(imageUrl)
-            setHasImageChoosed(false);
+            setIsPhotoUploading(false);
           });
         }
       })
@@ -191,6 +198,11 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
     setPreviewImage(null);
     setImageName(undefined);
     setHasImageChoosed(false);
+  }
+
+  function handleFormSubmit(values: ValuesProps) {
+    setIsFormUploading(true);
+    onSubmit(values, imageUrl);
   }
   
   return (
@@ -207,12 +219,14 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
           />
         </FileInputLabel>
         {hasImageChoosed && 
-        <Row>
-          <UploadBtn type='submit'>Upload Photo</UploadBtn>
-          <CancelUploadBtn type='button' onClick={handleCancelUpload}>Cancel</CancelUploadBtn>
-        </Row>}
+          <Row>
+            <UploadBtn type='submit'>Upload Photo</UploadBtn>
+            <CancelUploadBtn type='button' onClick={handleCancelUpload}>Cancel</CancelUploadBtn>
+          </Row>
+        }
+        {isPhotoUploading && <Row>Loading...</Row>}
       </Form>
-      <FinalForm onSubmit={(values: ValuesProps) => {if (imageUrl) {onSubmit(values, imageUrl)}}} initialValues={currentUser} render={({ handleSubmit }) => (
+      <FinalForm onSubmit={handleFormSubmit} initialValues={currentUser} render={({ handleSubmit }) => (
         <Form onSubmit={handleSubmit}>
           <FormRow>
             <HalfWidthFieldWrapper>
@@ -395,7 +409,7 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
           )}/>
           <FormRow>
             <CancelBtn type='button' onClick={() => hideUserInfoForm()}>Cancel</CancelBtn>
-            <SubmitBtn type='submit'>Save</SubmitBtn>
+            <SubmitBtn type='submit'>{isFormUploading ? <Loader type='TailSpin' color='#fff' height={35} width={35}/> : 'Save'}</SubmitBtn>
           </FormRow>
         </Form>
       )}/>
@@ -599,6 +613,9 @@ const CancelBtn = styled.button`
 `
 
 const SubmitBtn = styled(CancelBtn)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: #fff;
   border: solid 1px transparent;
   background-color: #48bbff;

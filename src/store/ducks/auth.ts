@@ -11,16 +11,18 @@ const setProfileInfo = createAction<{avatar: string, firstName: string, lastName
 
 const signIn = createAsyncThunk(
   'auth/signIn',
-  async (data: any) => {
+  async (data: {email: string, password: string}) => {
     try {
       const response = await api.signIn(data.email, data.password);
       const {email, id, role} = response.data.data;
       const accessToken = response.headers['access-token'];
       const client = response.headers.client;
       const uid = response.headers.uid;
+
       localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
       localStorage.setItem('user', JSON.stringify({email, id, role}));
       History.push(AppRoutes.privateRoutes.profile);
+
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
@@ -31,16 +33,18 @@ const signIn = createAsyncThunk(
 
 const signUp = createAsyncThunk(
   'auth/signUp',
-  async (data: any) => {
+  async (data: {email: string, password: string, password_confirmation: string, role: string}) => {
     try {
       const response = await api.signUp(data.email, data.password, data.password_confirmation, data.role);
       const {email, id, role} = response.data.data;
       const accessToken = response.headers['access-token'];
       const client = response.headers.client;
       const uid = response.headers.uid;
+
       localStorage.setItem('accessData', JSON.stringify({accessToken, client, uid}));
       localStorage.setItem('user', JSON.stringify({email, id, role}));
       History.push(AppRoutes.privateRoutes.profile);
+
       return {accessToken, client, uid, email, id};
     } catch (err) {
       throw err;
