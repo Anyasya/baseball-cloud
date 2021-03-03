@@ -85,7 +85,7 @@ function UserInformationBlock({currentUser, openUserInfoForm}: UserInformationBl
         }
         {currentUser?.biography && 
           <li>
-            <CategoryHeader>Personal Info</CategoryHeader>
+            <CategoryHeader>About</CategoryHeader>
             <InfoText>{currentUser?.biography}</InfoText>
           </li>
         }

@@ -15,6 +15,7 @@ import {AppRoutes} from 'navigation/routes';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {actions} from 'store';
+import Network from 'navigation/pages/Network';
 
 function App() {
   const dispatch = useDispatch();
@@ -61,6 +62,7 @@ function App() {
       <Route path={AppRoutes.publicRoutes.privacy} component={PrivacyPage}/>
       <Route path={AppRoutes.privateRoutes.profile} component={ProfilePage}/>
       <Route path={AppRoutes.privateRoutes.leaderBoard} component={LeaderBoard}/>
+      <Route path={AppRoutes.privateRoutes.network} component={Network}/>
     </Switch>
   );
 }

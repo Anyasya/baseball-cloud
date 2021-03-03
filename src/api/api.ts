@@ -1,3 +1,4 @@
+import { FilterValues, FavoriteValues } from './../navigation/pages/Network/Network';
 import axios from 'axios';
 import httpClient from './httpClient';
 import * as queries from './queries';
@@ -53,4 +54,16 @@ export function getCurrentProfile(id: string) {
 
 export function updateProfile(form: FormProps) {
   return httpClient.post('/graphql', queries.updateProfileQuery(form));
+}
+
+export function getBattingSummary(id: string) {
+  return httpClient.post('/graphql', queries.getBattingSummaryQuery(id));
+}
+
+export function getAllProfiles(input: FilterValues) {
+  return httpClient.post('/graphql', queries.getAllProfilesQuery(input));
+}
+
+export function updateFavoriteProfile(form: FavoriteValues) {
+  return httpClient.post('/graphql', queries.updateFavoriteProfileQuery(form));
 }

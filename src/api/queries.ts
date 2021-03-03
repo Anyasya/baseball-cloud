@@ -1,4 +1,5 @@
-import {FormProps} from '../components/UserInformationForm';
+import { FilterValues, FavoriteValues } from './../navigation/pages/Network/Network';
+import { FormProps } from '../components/UserInformationForm';
 
 export const getSchoolsQuery = () => ({
   query: `query getSchools ($search: String!) {
@@ -154,4 +155,68 @@ export const updateProfileQuery = (form: FormProps) => ({
     }
   }`,
   variables: { form },
+});
+
+export const getBattingSummaryQuery = (id: string) => ({
+  query: `query BattingSummary($id: ID!) {
+    batting_summary(id: $id) {
+      top_values {
+        id
+        distance
+        pitch_type
+        launch_angle
+        exit_velocity
+      }
+      average_values {
+        id
+        distance
+        pitch_type
+        launch_angle
+        exit_velocity
+      }
+    }
+  }`,
+  variables: { id },
+});
+
+export const getAllProfilesQuery = (input: FilterValues) => ({
+  query: `query Profiles($input: FilterProfilesInput!) {
+    profiles(input: $input) {
+      profiles {
+        id
+        first_name
+        last_name
+        position
+        position2
+        school_year
+        feet
+        inches
+        weight
+        age
+        events {
+          id
+        }
+        school {
+          id
+          name
+        }
+        teams {
+          id
+          name
+        }
+        favorite
+      }
+      total_count
+    },
+  }`,
+  variables: { input }
+});
+
+export const updateFavoriteProfileQuery = (form: FavoriteValues) => ({
+  query: `mutation UpdateFavoriteProfile($form: UpdateFavoriteProfileInput!) {
+    update_favorite_profile(input: $form) {
+      favorite
+    }
+  }`,
+  variables: {form}
 });

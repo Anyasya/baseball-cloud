@@ -10,7 +10,7 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Loader from 'react-loader-spinner';
 
 
-const positionOptions = [  
+const positionOptions = [
   { value: 'catcher', label: 'Catcher' },
   { value: 'first_base', label: 'First Base' },
   { value: 'second_base', label: 'Second Base' },
@@ -103,11 +103,6 @@ function UserInformationForm({currentUser, hideUserInfoForm, onSubmit}: UserInfo
   const [isFormUploading, setIsFormUploading] = useState(false);
 
   useEffect(() => {
-    // if (currentUser?.avatar) {
-    //   setPreviewImage(currentUser.avatar);
-    //   setImageUrl(currentUser.avatar);
-    // }
-
     api.getSchools().then((response) => {
       const schools = response.data.data.schools.schools.map((item: {id: string, name: string}) => {
         return {
@@ -574,10 +569,10 @@ const Label = styled.label`
 
 const SelectWrapper = styled.div`
   margin-bottom: 10px;
-  &:focus, &:active {
-    position: relative;
-    z-index: 3;
-  } 
+  // &:focus, &:active {
+  //   position: relative;
+  //   z-index: 3;
+  // } 
 `
 
 const CategoryHeader = styled.p`

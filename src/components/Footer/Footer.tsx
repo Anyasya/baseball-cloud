@@ -58,7 +58,7 @@ const Root = styled.footer`
   flex-wrap: wrap;
   justify-content: space-between;
   background-color: white;
-  border-bottom: 1px solid rgba(0,0,0,.1);
+  border-top: 1px solid rgba(0,0,0,.1);
 `
 
 const LinkBar = styled.ul`
